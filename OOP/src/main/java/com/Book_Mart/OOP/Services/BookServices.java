@@ -62,9 +62,7 @@ public class BookServices {
 
     public List<BookDTO> search(String value) {
         List<Book> searchedBooks = bookRepo.search(value);
-        return searchedBooks.stream()
-                .map(book -> modelMapper.map(book, BookDTO.class))
-                .collect(Collectors.toList());
+        return searchedBooks.stream().map(book -> modelMapper.map(book, BookDTO.class)).collect(Collectors.toList());
     }
 
 
