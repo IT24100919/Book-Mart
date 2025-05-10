@@ -24,6 +24,22 @@ public class Book {
     private String manufactureDate;
     private double price;
 
+    //Constructors
+
+//    public Book() {
+
+//    }
+//
+//    public Book(String bookName, String ISBN, String author, int stock, String details, String manufactureDate, double price) {
+//        this.bookName = bookName;
+//        this.ISBN = ISBN;
+//        this.author = author;
+//        this.stock = stock;
+//        this.details = details;
+//        this.manufactureDate = manufactureDate;
+//        this.price = price;
+//    }
+
     //Getters and Setters
 //    public long getBookId() {
 //        return bookId;
