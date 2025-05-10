@@ -24,4 +24,70 @@ public class Book {
     private String manufactureDate;
     private double price;
 
+    //Getters and Setters
+//    public long getBookId() {
+//        return bookId;
+//    }
+//
+//    public void setBookId(long bookId) {
+//        this.bookId = bookId;
+//    }
+//
+//    public String getBookName() {
+//        return bookName;
+//    }
+//
+//    public void setBookName(String bookName) {
+//        this.bookName = bookName;
+//    }
+//
+//    public String getISBN() {
+//        return ISBN;
+//    }
+//
+//    public void setISBN(String ISBN) {
+//        this.ISBN = ISBN;
+//    }
+//
+//    public String getAuthor() {
+//        return author;
+//    }
+//
+//    public void setAuthor(String author) {
+//        this.author = author;
+//    }
+//
+//    public int getStock() {
+//        return stock;
+//    }
+//
+//    public void setStock(int stock) {
+//        this.stock = stock;
+//    }
+//
+//    public String getDetails() {
+//        return details;
+//    }
+//
+//    public void setDetails(String details) {
+//        this.details = details;
+//    }
+//
+//    public String getManufactureDate() {
+//        return manufactureDate;
+//    }
+//
+//    public void setManufactureDate(String manufactureDate) {
+//        this.manufactureDate = manufactureDate;
+//    }
+//
+//    public double getPrice() {
+//        return price;
+//    }
+//
+//    public void setPrice(double price) {
+//        this.price = price;
+//    }
+
+
 }
