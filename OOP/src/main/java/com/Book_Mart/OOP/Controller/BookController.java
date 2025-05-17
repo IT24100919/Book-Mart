@@ -46,5 +46,4 @@ public class BookController {
     public List<BookDTO> search(@PathVariable String value){
         return bookServices.search(value);
     }
-
 }

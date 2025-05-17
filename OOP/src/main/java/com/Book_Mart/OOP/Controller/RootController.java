@@ -11,5 +11,5 @@ public class RootController {
         return "redirect:/home.html";
     }
 }
-
+//
 //This is for changing the address when i run localhost/8080 on my browser
