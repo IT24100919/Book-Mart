@@ -64,5 +64,41 @@ public class BookServices {
         return searchedBooks.stream().map(book -> modelMapper.map(book, BookDTO.class)).collect(Collectors.toList());
     }
 
+    // QuickSort by price
+    public void quickSortByPrice(List<Book> books, int low, int high) {
+        if (low < high) {
+            int pi = partitionPrice(books, low, high);
+            quickSortByPrice(books, low, pi - 1);
+            quickSortByPrice(books, pi + 1, high);
+        }
+    }
+    private int partitionPrice(List<Book> books, int low, int high) {
+        double pivot = books.get(high).getPrice();
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            if (books.get(j).getPrice() <= pivot) {
+                i++;
+                swap(books, i, j);
+            }
+        }
+        swap(books, i + 1, high);
+        return i + 1;
+    }
+
+    private void swap(List<Book> books, int i, int j) {
+        Book temp = books.get(i);
+        books.set(i, books.get(j));
+        books.set(j, temp);
+    }
+
+    // New method: get all sorted by price ascending
+    public List<BookDTO> getAllSortedByPrice() {
+        List<Book> books = bookRepo.findAll();
+        quickSortByPrice(books, 0, books.size() - 1);
+        return books.stream()
+                .map(book -> modelMapper.map(book, BookDTO.class))
+                .collect(Collectors.toList());
+    }
+
 
 }

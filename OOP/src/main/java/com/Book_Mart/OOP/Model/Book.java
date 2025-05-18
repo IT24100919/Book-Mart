@@ -25,6 +25,10 @@ public class Book {
     private String manufactureDate;
     private double price;
 
+    public String printDetails() {
+        return "Book ID: " + bookId + ", Name: " + bookName + ", Author: " + author + ", Price: " + price;
+    }
+
     //Constructors
 
 
