@@ -12,4 +12,4 @@ public class RootController {
     }
 }
 //
-//This is for changing the address when i run localhost/8080 on my browser
+//This is for changing the address when I run localhost/8080 on my browser
