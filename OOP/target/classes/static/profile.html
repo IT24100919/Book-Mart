@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book-Mart User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .futuristic-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--neon);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+
+        .card-enter {
+            animation: cardEnter 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes cardEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+            background: var(--accent);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-field.invalid {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--neon);
+            box-shadow: 0 0 20px rgba(0, 206, 201, 0.5);
+        }
+
+        .profile-section {
+            transition: all 0.3s ease;
+        }
+
+        .profile-section:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- Navbar -->
+<nav class="futuristic-card sticky top-0 z-50 mx-4 mt-4">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-user-circle text-3xl text-var(--neon) neon-text"></i>
+                <h1 class="text-3xl font-bold logo-text">
+                    Book<span class="font-extrabold">Mart</span> Profile
+                </h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="home.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="index.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-book mr-2"></i> Inventory
+                </a>
+                <a href="user.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-users-cog mr-2"></i> User Portal
+                </a>
+                <a href="profile.html" class="nav-item text-white hover:text-var(--neon) active">
+                    <i class="fas fa-user mr-2"></i> Profile
+                </a>
+                <button class="cyber-button bg-gradient-to-r from-red-500 to-pink-500" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </div>
+            <button class="md:hidden text-white focus:outline-none" id="mobileMenuBtn">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden md:hidden futuristic-card mx-4 mt-2 p-4">
+    <div class="flex flex-col space-y-3">
+        <a href="home.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-home mr-2"></i> Home
+        </a>
+        <a href="index.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-book mr-2"></i> Inventory
+        </a>
+        <a href="user.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-users-cog mr-2"></i> User Portal
+        </a>
+        <a href="profile.html" class="nav-item text-white hover:text-var(--neon) active">
+            <i class="fas fa-user mr-2"></i> Profile
+        </a>
+        <button class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 w-full" id="mobileLogoutBtn">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Profile Card -->
+        <div class="lg:col-span-1">
+            <div class="futuristic-card p-6 text-center profile-section">
+                <div class="flex justify-center mb-4">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6c5ce7&color=fff&size=128"
+                         alt="Profile Avatar"
+                         class="profile-avatar"
+                         id="profileAvatar">
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-1" id="profileUsername">Loading...</h2>
+                <p class="text-gray-400 mb-6" id="profileEmail">user@example.com</p>
+                <button class="cyber-button bg-gradient-to-r from-purple-500 to-pink-500 w-full mb-3" id="editProfileBtn">
+                    <i class="fas fa-edit mr-2"></i> Edit Profile
+                </button>
+                <button class="cyber-button bg-gradient-to-r from-blue-500 to-cyan-400 w-full" id="changePasswordBtn">
+                    <i class="fas fa-key mr-2"></i> Change Password
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="lg:col-span-2">
+            <div class="futuristic-card p-6 mb-6 profile-section">
+                <h2 class="text-xl font-bold text-white mb-6">
+                    <i class="fas fa-info-circle mr-2"></i>Account Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">User ID</label>
+                        <p class="text-white font-medium" id="profileUserId">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">Username</label>
+                        <p class="text-white font-medium" id="profileUsernameDetail">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">Email</label>
+                        <p class="text-white font-medium" id="profileEmailDetail">Loading...</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-1">Account Created</label>
+                        <p class="text-white font-medium" id="profileCreatedAt">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Modal -->
+            <div id="editProfileModal" class="hidden modal-overlay">
+                <div class="futuristic-card max-w-md w-full p-8 modal-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold logo-text">
+                            <i class="fas fa-user-edit mr-2"></i> Edit Profile
+                        </h2>
+                        <button id="closeEditProfileModal" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    <form id="editProfileForm" class="space-y-6">
+                        <input type="hidden" id="editUserId">
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-user mr-2 text-var(--primary)"></i>Username
+                            </label>
+                            <input type="text" id="editUsername" class="input-field w-full" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-envelope mr-2 text-var(--primary)"></i>Email
+                            </label>
+                            <input type="email" id="editEmail" class="input-field w-full" required>
+                        </div>
+                        <div class="flex justify-end space-x-4 pt-4">
+                            <button type="button" id="cancelEditProfile" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                                Cancel
+                            </button>
+                            <button type="submit" class="cyber-button">
+                                <i class="fas fa-save mr-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password Modal -->
+            <div id="changePasswordModal" class="hidden modal-overlay">
+                <div class="futuristic-card max-w-md w-full p-8 modal-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold logo-text">
+                            <i class="fas fa-key mr-2"></i> Change Password
+                        </h2>
+                        <button id="closeChangePasswordModal" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    <form id="changePasswordForm" class="space-y-6">
+                        <input type="hidden" id="passwordUserId">
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-lock mr-2 text-var(--primary)"></i>Current Password
+                            </label>
+                            <input type="password" id="currentPassword" class="input-field w-full" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-lock mr-2 text-var(--primary)"></i>New Password
+                            </label>
+                            <input type="password" id="newPassword" class="input-field w-full" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-lock mr-2 text-var(--primary)"></i>Confirm New Password
+                            </label>
+                            <input type="password" id="confirmNewPassword" class="input-field w-full" required>
+                        </div>
+                        <div class="flex justify-end space-x-4 pt-4">
+                            <button type="button" id="cancelChangePassword" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                                Cancel
+                            </button>
+                            <button type="submit" class="cyber-button">
+                                <i class="fas fa-save mr-2"></i> Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // API Base URL - matches your UserController
+    const API_BASE_URL = 'http://localhost:8080/api/v2';
+
+    // Load profile data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProfileData();
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+
+        // Logout buttons
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('mobileLogoutBtn').addEventListener('click', handleLogout);
+
+        // Profile edit buttons
+        document.getElementById('editProfileBtn').addEventListener('click', openEditProfileModal);
+        document.getElementById('changePasswordBtn').addEventListener('click', openChangePasswordModal);
+
+        // Modal close buttons
+        document.getElementById('closeEditProfileModal').addEventListener('click', closeEditProfileModal);
+        document.getElementById('closeChangePasswordModal').addEventListener('click', closeChangePasswordModal);
+        document.getElementById('cancelEditProfile').addEventListener('click', closeEditProfileModal);
+        document.getElementById('cancelChangePassword').addEventListener('click', closeChangePasswordModal);
+
+        // Form submissions
+        document.getElementById('editProfileForm').addEventListener('submit', saveProfileChanges);
+        document.getElementById('changePasswordForm').addEventListener('submit', updatePassword);
+    }
+
+    function toggleMobileMenu() {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+
+    async function loadProfileData() {
+        try {
+            // Get user ID from localStorage (set during login)
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Fetch user data from your API
+            const response = await axios.get(`${API_BASE_URL}/searchByEmailOrID/${userId}`);
+
+            if (response.data && response.data.length > 0) {
+                const user = response.data[0]; // Get first user from search results
+
+                // Update profile card
+                document.getElementById('profileUsername').textContent = user.userName || 'User';
+                document.getElementById('profileEmail').textContent = user.email || 'No email';
+                document.getElementById('profileUsernameDetail').textContent = user.userName || 'User';
+                document.getElementById('profileEmailDetail').textContent = user.email || 'No email';
+                document.getElementById('profileUserId').textContent = user.userId || 'N/A';
+
+                // Set avatar based on username
+                const name = user.userName || 'User';
+                document.getElementById('profileAvatar').src =
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6c5ce7&color=fff&size=128`;
+
+                // Set created at date (simulated since your DTO doesn't have this field)
+                document.getElementById('profileCreatedAt').textContent = 'Today';
+
+                // Populate edit form
+                document.getElementById('editUserId').value = user.userId;
+                document.getElementById('editUsername').value = user.userName || '';
+                document.getElementById('editEmail').value = user.email || '';
+
+                // Set user ID for password change
+                document.getElementById('passwordUserId').value = user.userId;
+            } else {
+                throw new Error('User not found');
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            alert('Failed to load profile data');
+            window.location.href = '/login.html';
+        }
+    }
+
+    function openEditProfileModal() {
+        document.getElementById('editProfileModal').classList.remove('hidden');
+    }
+
+    function closeEditProfileModal() {
+        document.getElementById('editProfileModal').classList.add('hidden');
+    }
+
+    function openChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.remove('hidden');
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('changePasswordModal').classList.add('hidden');
+    }
+
+    async function saveProfileChanges(e) {
+        e.preventDefault();
+
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const profileData = {
+            userId: document.getElementById('editUserId').value,
+            userName: document.getElementById('editUsername').value,
+            email: document.getElementById('editEmail').value
+        };
+
+        try {
+            await axios.put(`${API_BASE_URL}/update`, profileData);
+
+            alert('Profile updated successfully!');
+            closeEditProfileModal();
+            loadProfileData();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Failed to update profile');
+        }
+    }
+
+    async function updatePassword(e) {
+        e.preventDefault();
+
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        if (newPassword !== confirmNewPassword) {
+            alert('New passwords do not match');
+            return;
+        }
+
+        try {
+            // Note: Your backend doesn't currently have a password change endpoint
+            // This is a placeholder for when you implement it
+            await axios.put(`${API_BASE_URL}/update`, {
+                userId: document.getElementById('passwordUserId').value,
+                password: newPassword
+            });
+
+            alert('Password updated successfully! Please login again.');
+            closeChangePasswordModal();
+            handleLogout();
+        } catch (error) {
+            console.error('Error updating password:', error);
+            alert('Failed to update password. Please check your current password.');
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('authToken');
+        window.location.href = '/login.html';
+    }
+</script>
+</body>
+</html>
