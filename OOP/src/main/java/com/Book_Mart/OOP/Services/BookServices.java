@@ -13,9 +13,14 @@ import java.util.stream.Collectors;
 @Service
 public class BookServices {
     @Autowired
-    private BookRepo bookRepo;
+    private final BookRepo bookRepo;
     @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+
+    public BookServices(BookRepo bookRepo, ModelMapper modelMapper) {
+        this.bookRepo = bookRepo;
+        this.modelMapper = modelMapper;
+    }
 
     public BookDTO createBook(BookDTO bookDTO){
         bookRepo.save(modelMapper.map(bookDTO, Book.class));
