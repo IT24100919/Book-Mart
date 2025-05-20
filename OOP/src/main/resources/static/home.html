@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Mart - Futuristic Book Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .futuristic-card:hover::before {
+            opacity: 0.7;
+        }
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+        .card-enter {
+            animation: cardEnter 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes cardEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .nav-item {
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        .nav-item.active::after {
+            width: 100%;
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- Navbar -->
+<nav class="futuristic-card sticky top-0 z-50 mx-4 mt-4">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-book-open text-3xl text-var(--neon) neon-text"></i>
+                <h1 class="text-3xl font-bold logo-text">
+                    Book<span class="font-extrabold">Mart</span>
+                </h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6" id="desktopNav">
+                <a href="/home.html" class="nav-item text-white hover:text-var(--neon) active">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="/index.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-book mr-2"></i> Inventory
+                </a>
+                <a href="/user.html" class="nav-item text-white hover:text-var(--neon) admin-only hidden">
+                    <i class="fas fa-users-cog mr-2"></i> User Portal
+                </a>
+                <a href="/admin.html" class="nav-item text-white hover:text-var(--neon) admin-only hidden">
+                    <i class="fas fa-user-shield mr-2"></i> Admin Portal
+                </a>
+                <a href="/login.html" class="nav-item text-white hover:text-var(--neon) login-link">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Login
+                </a>
+                <button id="logoutBtn" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 hidden">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden md:hidden futuristic-card mx-4 mt-2 p-4">
+    <div class="flex flex-col space-y-3">
+        <a href="/home.html" class="nav-item text-white hover:text-var(--neon) active">
+            <i class="fas fa-home mr-2"></i> Home
+        </a>
+        <a href="/index.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-book mr-2"></i> Inventory
+        </a>
+        <a href="/user.html" class="nav-item text-white hover:text-var(--neon) admin-only hidden">
+            <i class="fas fa-users-cog mr-2"></i> User Portal
+        </a>
+        <a href="/admin.html" class="nav-item text-white hover:text-var(--neon) admin-only hidden">
+            <i class="fas fa-user-shield mr-2"></i> Admin Portal
+        </a>
+        <a href="/login.html" class="nav-item text-white hover:text-var(--neon) login-link">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+        </a>
+        <button id="mobileLogoutBtn" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 w-full hidden">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-80px)]">
+    <div class="futuristic-card p-8 md:p-12 rounded-2xl shadow-2xl text-center max-w-4xl w-full card-enter">
+        <div class="floating mb-8">
+            <i class="fas fa-book-open text-6xl text-var(--neon) neon-text"></i>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-bold logo-text mb-6">
+            Welcome to Book Mart
+        </h2>
+        <p class="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+            Your futuristic portal for managing book inventory and user accounts.
+            Experience the next generation of bookstore management.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <a href="/index.html" class="cyber-button">
+                <i class="fas fa-book mr-2"></i> Book Inventory
+            </a>
+            <a href="/user.html" class="cyber-button bg-gradient-to-r from-var(--accent) to-var(--neon)">
+                <i class="fas fa-users-cog mr-2"></i> User Portal
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mx-auto px-4 py-16">
+    <h2 class="text-3xl font-bold text-center mb-16 logo-text">
+        <i class="fas fa-stars mr-2"></i> Key Features
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="futuristic-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+            <div class="bg-var(--primary) bg-opacity-20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 mx-auto">
+                <i class="fas fa-book text-2xl text-var(--primary)"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3">Smart Inventory</h3>
+            <p class="text-gray-400 text-center">
+                Manage your entire book collection with advanced search, filtering, and real-time updates.
+            </p>
+        </div>
+        <div class="futuristic-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+            <div class="bg-var(--accent) bg-opacity-20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 mx-auto">
+                <i class="fas fa-users text-2xl text-var(--accent)"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3">User Management</h3>
+            <p class="text-gray-400 text-center">
+                Control user access and permissions with our secure administration portal.
+            </p>
+        </div>
+        <div class="futuristic-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+            <div class="bg-var(--neon) bg-opacity-20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4 mx-auto">
+                <i class="fas fa-chart-line text-2xl text-var(--neon)"></i>
+            </div>
+            <h3 class="text-xl font-bold text-center mb-3">Real-time Analytics</h3>
+            <p class="text-gray-400 text-center">
+                Get insights into your inventory with beautiful, interactive dashboards.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="futuristic-card mx-4 mb-4 mt-16">
+    <div class="container mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <i class="fas fa-book-open text-2xl text-var(--neon) animate-pulse"></i>
+                <h2 class="text-xl font-bold logo-text">Book Mart</h2>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-var(--neon) transition-colors hover:scale-110">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-var(--neon) transition-colors hover:scale-110">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-var(--neon) transition-colors hover:scale-110">
+                    <i class="fab fa-discord text-xl"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left text-sm text-gray-400">
+            <div>
+                <h3 class="text-var(--neon) font-semibold mb-2">Explore</h3>
+                <ul class="space-y-1">
+                    <li><a href="#" class="hover:text-white">Home</a></li>
+                    <li><a href="#" class="hover:text-white">Categories</a></li>
+                    <li><a href="#" class="hover:text-white">Bestsellers</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-var(--neon) font-semibold mb-2">Support</h3>
+                <ul class="space-y-1">
+                    <li><a href="#" class="hover:text-white">Help Center</a></li>
+                    <li><a href="#" class="hover:text-white">Contact Us</a></li>
+                    <li><a href="#" class="hover:text-white">Feedback</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-var(--neon) font-semibold mb-2">Subscribe</h3>
+                <form class="flex flex-col space-y-2">
+                    <input type="email" placeholder="Enter your email" class="bg-gray-800 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-var(--neon)">
+                    <button type="submit" class="bg-var(--neon) text-black font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition">Join Newsletter</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-500 text-sm">
+            2025 Book Mart. All rights reserved. A Book management system by PG100.
+        </div>
+    </div>
+</footer>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        updateNavLinks();
+        const hero = document.querySelector('.card-enter');
+        hero.style.opacity = '0';
+        hero.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            hero.style.opacity = '1';
+            hero.style.transform = 'translateY(0)';
+        }, 100);
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('card-enter');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.futuristic-card').forEach((card, index) => {
+            if (index > 0) {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.animationDelay = `${index * 0.1}s`;
+                observer.observe(card);
+            }
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('mobileLogoutBtn').addEventListener('click', handleLogout);
+    });
+
+    function toggleMobileMenu() {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+
+    function updateNavLinks() {
+        const token = localStorage.getItem('authToken');
+        const userRole = localStorage.getItem('userRole');
+        const loginLink = document.querySelectorAll('.login-link');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const adminLinks = document.querySelectorAll('.admin-only');
+
+        if (token) {
+            loginLink.forEach(link => link.classList.add('hidden'));
+            logoutBtn.classList.remove('hidden');
+            mobileLogoutBtn.classList.remove('hidden');
+            if (userRole === 'admin') {
+                adminLinks.forEach(link => link.classList.remove('hidden'));
+            } else {
+                adminLinks.forEach(link => link.classList.add('hidden'));
+            }
+        } else {
+            loginLink.forEach(link => link.classList.remove('hidden'));
+            logoutBtn.classList.add('hidden');
+            mobileLogoutBtn.classList.add('hidden');
+            adminLinks.forEach(link => link.classList.add('hidden'));
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        alert('Logged out successfully');
+        window.location.href = '/login.html';
+    }
+</script>
+</body>
+</html>
