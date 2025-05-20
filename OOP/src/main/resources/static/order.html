@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookMart - Order Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .futuristic-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--neon);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 50%;
+            height: 2px;
+            background: var(--neon);
+            transform: translateX(-50%);
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-field[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-50%);
+        }
+
+        .search-input {
+            padding-left: 35px;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .status-shipped {
+            color: #0dcaf0;
+            background: rgba(13, 202, 240, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .status-delivered {
+            color: #198754;
+            background: rgba(25, 135, 84, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .select-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="rgba(255,255,255,0.5)" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .table {
+            color: var(--light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .table th {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--neon);
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="sidebar w-64 p-0 flex-shrink-0">
+        <div class="p-4 text-white">
+            <h4 class="text-2xl font-bold logo-text">
+                <i class="fas fa-book-open mr-2 text-var(--neon)"></i>BookMart
+            </h4>
+            <hr class="border-gray-600 my-3">
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link flex items-center" href="index.html">
+                    <i class="fas fa-book mr-2 text-var(--neon)"></i>Book Inventory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link flex items-center active" href="order.html">
+                    <i class="fas fa-shopping-cart mr-2 text-var(--neon)"></i>Order Management
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex-1">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold logo-text">
+                    <i class="fas fa-shopping-cart mr-2"></i>Order Management
+                </h2>
+                <button class="cyber-button" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                    <i class="fas fa-plus mr-2"></i>Add New Order
+                </button>
+            </div>
+
+            <!-- Filter and Search -->
+            <div class="futuristic-card p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <select id="statusFilter" class="select-field">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="input-field search-input" placeholder="Search by customer or book...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="futuristic-card">
+                <div class="p-6">
+                    <div class="table-responsive">
+                        <table class="table table-hover w-full">
+                            <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Book</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                            <!-- Orders will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Order Modal -->
+<div class="modal fade modal-overlay hidden" id="addOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="futuristic-card max-w-4xl w-full p-8 modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h5 class="text-2xl font-bold logo-text">
+                <i class="fas fa-plus-circle mr-2"></i>Add New Order
+            </h5>
+            <button type="button" class="text-gray-400 hover:text-white transition-colors" data-bs-dismiss="modal" aria-label="Close">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <form id="addOrderForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-user mr-2 text-var(--primary)"></i>Customer Name
+                        </label>
+                        <input type="text" class="input-field" id="customerName" required>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-envelope mr-2 text-var(--primary)"></i>Customer Email
+                        </label>
+                        <input type="email" class="input-field" id="customerEmail" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2 text-gray-300">
+                        <i class="fas fa-map-marker-alt mr-2 text-var(--primary)"></i>Shipping Address
+                    </label>
+                    <textarea class="input-field" id="shippingAddress" rows="2" required></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-book mr-2 text-var(--primary)"></i>Book
+                        </label>
+                        <select class="select-field text-black" id="bookSelect" required>
+                            <option value="">Select a book</option>
+                            <!-- Books will be loaded here -->
+                        </select>
+
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-boxes mr-2 text-var(--primary)"></i>Quantity
+                        </label>
+                        <input type="number" class="input-field" id="quantity" min="1" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-tag mr-2 text-var(--primary)"></i>Price per unit
+                        </label>
+                        <input type="number" class="input-field" id="unitPrice" readonly>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-dollar-sign mr-2 text-var(--primary)"></i>Total Price
+                        </label>
+                        <input type="number" class="input-field" id="totalPrice" readonly>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2 text-gray-300">
+                        <i class="fas fa-box mr-2 text-var(--primary)"></i>Available Stock
+                    </label>
+                    <input type="number" class="input-field" id="availableStock" readonly>
+                </div>
+            </form>
+        </div>
+        <div class="flex justify-end space-x-4 pt-4">
+            <button type="button" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="cyber-button" id="saveOrderBtn">
+                <i class="fas fa-save mr-2"></i>Save Order
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade modal-overlay hidden" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="futuristic-card max-w-lg w-full p-8 modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h5 class="text-2xl font-bold logo-text">
+                <i class="fas fa-sync-alt mr-2"></i>Update Order Status
+            </h5>
+            <button type="button" class="text-gray-400 hover:text-white transition-colors" data-bs-dismiss="modal" aria-label="Close">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <form id="updateStatusForm" class="space-y-6">
+                <input type="hidden" id="orderIdToUpdate">
+                <div>
+                    <label class="block font-semibold mb-2 text-gray-300">
+                        <i class="fas fa-info-circle mr-2 text-var(--primary)"></i>Current Status
+                    </label>
+                    <input type="text" class="input-field" id="currentStatus" readonly>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2 text-gray-300">
+                        <i class="fas fa-sync mr-2 text-var(--primary)"></i>New Status
+                    </label>
+                    <select class="select-field" id="newStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="flex justify-end space-x-4 pt-4">
+            <button type="button" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="cyber-button" id="updateStatusBtn">
+                <i class="fas fa-check mr-2"></i>Update Status
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Global variables
+    let books = [];
+    let orders = [];
+    let addOrderModal = null;
+    let updateStatusModal = null;
+
+    // DOM Ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap modals
+        addOrderModal = new bootstrap.Modal(document.getElementById('addOrderModal'));
+        updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+
+        // Setup manual close buttons
+        document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.closest('#addOrderModal')) {
+                    addOrderModal.hide();
+                } else if (this.closest('#updateStatusModal')) {
+                    updateStatusModal.hide();
+                }
+            });
+        });
+
+        loadBooks();
+        loadOrders();
+        setupEventListeners();
+    });
+
+    // Load all books for dropdown
+    function loadBooks() {
+        axios.get('/api/v1/display')
+            .then(response => {
+                books = response.data;
+                const bookSelect = document.getElementById('bookSelect');
+                bookSelect.innerHTML = '<option value="">Select a book</option>';
+
+                books.forEach(book => {
+                    if (book.stock > 0) {
+                        const option = document.createElement('option');
+                        option.value = book.bookId;
+                        option.textContent = `${book.bookName} (${book.author}) - $${book.price.toFixed(2)} - Stock: ${book.stock}`;
+                        option.setAttribute('data-price', book.price);
+                        option.setAttribute('data-stock', book.stock);
+                        bookSelect.appendChild(option);
+                    }
+                });
+
+                if (bookSelect.options.length === 1) {
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.textContent = "No books available in stock";
+                    option.disabled = true;
+                    bookSelect.appendChild(option);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading books:', error);
+                alert('Failed to load books. Please try again.');
+            });
+    }
+
+    // Load all orders
+    function loadOrders(filterStatus = '', searchTerm = '') {
+        let url = '/api/v6/display';
+
+        if (filterStatus) {
+            url = `/api/v6/status/${filterStatus}`;
+        }
+
+        axios.get(url)
+            .then(response => {
+                orders = response.data;
+
+                // Ensure each order has proper book reference
+                orders.forEach(order => {
+                    if (order.bookId && !order.book) {
+                        const relatedBook = books.find(b => b.bookId === order.bookId);
+                        if (relatedBook) {
+                            order.book = relatedBook;
+                        }
+                    }
+                });
+
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    orders = orders.filter(order =>
+                        order.customerName.toLowerCase().includes(term) ||
+                        order.customerEmail.toLowerCase().includes(term) ||
+                        (order.book && order.book.bookName.toLowerCase().includes(term))
+                    );
+                }
+
+                renderOrdersTable();
+            })
+            .catch(error => {
+                console.error('Error loading orders:', error);
+                alert('Failed to load orders. Please try again.');
+            });
+    }
+
+    // Render orders in table
+    function renderOrdersTable() {
+        const tbody = document.getElementById('ordersTableBody');
+        tbody.innerHTML = '';
+
+        if (orders.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="8" class="text-center">No orders found</td>';
+            tbody.appendChild(tr);
+            return;
+        }
+
+        orders.forEach(order => {
+            const tr = document.createElement('tr');
+
+            let bookName = 'Book not found';
+            if (order.book && typeof order.book === 'object') {
+                bookName = order.book.bookName;
+            } else if (order.bookId) {
+                const book = books.find(b => b.bookId === order.bookId);
+                bookName = book ? book.bookName : `Book ID: ${order.bookId}`;
+            }
+
+            const statusClass = `status-${order.status.toLowerCase()}`;
+            const orderDate = new Date(order.orderDate).toLocaleDateString();
+
+            tr.innerHTML = `
+                <td>${order.orderId}</td>
+                <td>${order.customerName}<br><small>${order.customerEmail}</small></td>
+                <td>${bookName}</td>
+                <td>${order.quantity}</td>
+                <td>$${order.totalPrice.toFixed(2)}</td>
+                <td><span class="${statusClass}">${capitalizeFirstLetter(order.status)}</span></td>
+                <td>${orderDate}</td>
+                <td>
+                    <button class="update-status-btn w-8 h-8 flex items-center justify-center bg-blue-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all mr-2"
+                            data-order-id="${order.orderId}" data-current-status="${order.status}" title="Update Status">
+                        <i class="fas fa-sync text-sm"></i>
+                    </button>
+                    <button class="delete-order-btn w-8 h-8 flex items-center justify-center bg-red-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all"
+                            data-order-id="${order.orderId}" title="Cancel Order">
+                        <i class="fas fa-trash-alt text-sm"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Book selection change
+        document.getElementById('bookSelect').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const unitPriceInput = document.getElementById('unitPrice');
+            const stockInput = document.getElementById('availableStock');
+            const quantityInput = document.getElementById('quantity');
+
+            if (selectedOption.value) {
+                unitPriceInput.value = selectedOption.getAttribute('data-price');
+                stockInput.value = selectedOption.getAttribute('data-stock');
+                quantityInput.value = '';
+                quantityInput.max = selectedOption.getAttribute('data-stock');
+                document.getElementById('totalPrice').value = '';
+            } else {
+                unitPriceInput.value = '';
+                stockInput.value = '';
+                quantityInput.value = '';
+                quantityInput.max = '';
+                document.getElementById('totalPrice').value = '';
+            }
+        });
+
+        // Quantity change
+        document.getElementById('quantity').addEventListener('input', function() {
+            const availableStock = parseInt(document.getElementById('availableStock').value) || 0;
+            const quantity = parseInt(this.value) || 0;
+
+            if (quantity > availableStock) {
+                alert(`Only ${availableStock} items available in stock!`);
+                this.value = availableStock;
+            }
+
+            calculateTotalPrice();
+        });
+
+        // Save order button
+        document.getElementById('saveOrderBtn').addEventListener('click', saveOrder);
+
+        // Update status button
+        document.getElementById('updateStatusBtn').addEventListener('click', updateOrderStatus);
+
+        // Status filter change
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            loadOrders(this.value);
+        });
+
+        // Search input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            loadOrders(document.getElementById('statusFilter').value, this.value);
+        });
+
+        // Delegated events for dynamically added buttons
+        document.getElementById('ordersTableBody').addEventListener('click', function(e) {
+            // Update status button
+            if (e.target.closest('.update-status-btn')) {
+                const button = e.target.closest('.update-status-btn');
+                const orderId = button.getAttribute('data-order-id');
+                const currentStatus = button.getAttribute('data-current-status');
+
+                document.getElementById('orderIdToUpdate').value = orderId;
+                document.getElementById('currentStatus').value = capitalizeFirstLetter(currentStatus);
+                document.getElementById('newStatus').value = currentStatus;
+
+                updateStatusModal.show();
+            }
+
+            // Delete order button
+            if (e.target.closest('.delete-order-btn')) {
+                if (confirm('Are you sure you want to cancel this order?')) {
+                    const orderId = e.target.closest('.delete-order-btn').getAttribute('data-order-id');
+                    deleteOrder(orderId);
+                }
+            }
+        });
+    }
+
+    // Calculate total price
+    function calculateTotalPrice() {
+        const quantity = parseInt(document.getElementById('quantity').value) || 0;
+        const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+        const availableStock = parseInt(document.getElementById('availableStock').value) || 0;
+
+        if (quantity > availableStock) {
+            alert(`Only ${availableStock} items available in stock!`);
+            document.getElementById('quantity').value = availableStock;
+            return;
+        }
+
+        document.getElementById('totalPrice').value = (quantity * unitPrice).toFixed(2);
+    }
+
+    // Save new order
+    function saveOrder() {
+        const form = document.getElementById('addOrderForm');
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const bookId = document.getElementById('bookSelect').value;
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const selectedBook = books.find(book => book.bookId == bookId);
+
+        if (!selectedBook) {
+            alert('Selected book not found!');
+            return;
+        }
+
+        if (quantity > selectedBook.stock) {
+            alert(`Only ${selectedBook.stock} items available in stock!`);
+            return;
+        }
+
+        const orderData = {
+            bookId: bookId,
+            quantity: quantity,
+            customerName: document.getElementById('customerName').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            shippingAddress: document.getElementById('shippingAddress').value
+        };
+
+        axios.post('/api/v6/create', orderData)
+            .then(response => {
+                alert('Order created successfully!');
+                loadBooks(); // Refresh book list (stock might have changed)
+                loadOrders(); // Refresh order list
+                addOrderModal.hide();
+                form.reset();
+                form.classList.remove('was-validated');
+            })
+            .catch(error => {
+                console.error('Error creating order:', error);
+                alert('Failed to create order: ' +
+                    (error.response?.data?.message || error.message));
+            });
+    }
+
+    // Update order status
+    function updateOrderStatus() {
+        const orderId = document.getElementById('orderIdToUpdate').value;
+        const newStatus = document.getElementById('newStatus').value;
+
+        axios.put(`/api/v6/update/${orderId}/${newStatus}`)
+            .then(response => {
+                alert('Order status updated successfully!');
+                loadOrders();
+                updateStatusModal.hide();
+            })
+            .catch(error => {
+                console.error('Error updating order status:', error);
+                alert('Failed to update order status: ' +
+                    (error.response?.data?.message || error.message));
+            });
+    }
+
+    // Delete order
+    function deleteOrder(orderId) {
+        axios.delete(`/api/v6/delete/${orderId}`)
+            .then(response => {
+                alert('Order cancelled successfully!');
+                loadOrders();
+            })
+            .catch(error => {
+                console.error('Error cancelling order:', error);
+                alert('Failed to cancel order: ' +
+                    (error.response?.data?.message || error.message));
+            });
+    }
+
+    // Helper function
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>
+</body>
+</html>

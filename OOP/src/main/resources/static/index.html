@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Mart Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .futuristic-card:hover::before {
+            opacity: 0.7;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--neon);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+
+        .card-enter {
+            animation: cardEnter 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes cardEnter {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        /* Input field styling */
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-field.invalid {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        textarea.input-field {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Date input styling */
+        input[type="date"].input-field {
+            padding: 11px 16px;
+        }
+
+        /* Number input styling */
+        input[type="number"].input-field {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"].input-field::-webkit-outer-spin-button,
+        input[type="number"].input-field::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- Navbar -->
+<nav class="futuristic-card sticky top-0 z-50 mx-4 mt-4">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-book-open text-3xl text-var(--neon) neon-text"></i>
+                <h1 class="text-3xl font-bold logo-text">
+                    Book<span class="font-extrabold">Mart</span>
+                </h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="/home.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <button id="addBookBtn" class="cyber-button">
+                    <i class="fas fa-plus mr-2"></i> Add Book
+                </button>
+                <a href="/order.html" class="cyber-button">
+                    <i class="fas fa-shopping-bag mr-2"></i> Order
+                </a>
+            </div>
+            <button class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Main Container -->
+<div class="container mx-auto px-4 py-8">
+    <!-- Search Bar -->
+    <div id="searchBar" class="my-10">
+        <div class="futuristic-card p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input id="searchInput" type="text" placeholder="Search by title, author, or ISBN..."
+                           class="input-field w-full pl-10 pr-4 py-3 bg-transparent text-white">
+                </div>
+                <button id="searchBtn" class="cyber-button bg-gradient-to-r from-blue-500 to-cyan-400">
+                    <i class="fas fa-search mr-2"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="hidden flex justify-center my-12">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Book Grid -->
+    <div id="bookList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
+        <div class="mb-6">
+            <i class="fas fa-book-dead text-6xl text-gray-500"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-400 mb-2">No Books Found</h3>
+        <p class="text-gray-500 mb-6">Try adjusting your search or add a new book to Book Mart</p>
+        <button id="addBookEmptyBtn" class="cyber-button">
+            <i class="fas fa-plus mr-2"></i> Add New Book
+        </button>
+    </div>
+
+    <!-- Add Book Form -->
+    <div id="bookForm" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="futuristic-card max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold logo-text">
+                    <i class="fas fa-plus-circle mr-2"></i> Add New Book
+                </h2>
+                <button id="cancelAddBtn" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="bookFormElement" class="space-y-6">
+                <input type="hidden" id="bookId" />
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-book mr-2 text-var(--primary)"></i>Book Title
+                        </label>
+                        <input id="bookName" type="text" class="input-field w-full" placeholder="Enter book title" required />
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-barcode mr-2 text-var(--primary)"></i>ISBN
+                        </label>
+                        <input id="isbn" type="text" class="input-field w-full" placeholder="Enter ISBN number" required />
+                    </div>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-user-edit mr-2 text-var(--primary)"></i>Author
+                        </label>
+                        <input id="author" type="text" class="input-field w-full" placeholder="Enter author name" required />
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-boxes mr-2 text-var(--primary)"></i>Stock Quantity
+                        </label>
+                        <input id="stock" type="number" min="0" class="input-field w-full" placeholder="Enter stock quantity" required />
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2 text-gray-300">
+                        <i class="fas fa-align-left mr-2 text-var(--primary)"></i>Description
+                    </label>
+                    <textarea id="details" class="input-field w-full" placeholder="Enter book description" rows="4"></textarea>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-calendar-alt mr-2 text-var(--primary)"></i>Publish Date
+                        </label>
+                        <input id="manufactureDate" type="date" class="input-field w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-2 text-gray-300">
+                            <i class="fas fa-tag mr-2 text-var(--primary)"></i>Price ($)
+                        </label>
+                        <input id="price" type="number" step="0.01" min="0" class="input-field w-full" placeholder="Enter price" required />
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" id="resetFormBtn" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                        <i class="fas fa-undo mr-2"></i> Reset
+                    </button>
+                    <button type="submit" class="cyber-button">
+                        <i class="fas fa-save mr-2"></i> Save Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Book Details Modal -->
+    <div id="descriptionModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="futuristic-card max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold logo-text"></h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-user-edit text-lg text-var(--primary) mr-3"></i>
+                        <p id="modalAuthor" class="text-gray-300 font-medium"></p>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-barcode text-lg text-var(--primary) mr-3"></i>
+                        <p id="modalIsbn" class="text-gray-300 font-medium"></p>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-boxes text-lg text-var(--primary) mr-3"></i>
+                        <p id="modalStock" class="text-gray-300 font-medium"></p>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tag text-lg text-var(--primary) mr-3"></i>
+                        <p id="modalPrice" class="text-gray-300 font-medium"></p>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-alt text-lg text-var(--primary) mr-3"></i>
+                        <p id="modalDate" class="text-gray-300 font-medium"></p>
+                    </div>
+                </div>
+                <div class="flex justify-center items-center">
+                    <div class="h-32 w-32 rounded-xl bg-gradient-to-br from-var(--primary) to-var(--accent)) flex items-center justify-center text-white text-4xl">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-300 mb-2">
+                    <i class="fas fa-align-left mr-2 text-var(--primary)"></i>Description
+                </h3>
+                <p id="modalDescription" class="text-gray-400"></p>
+            </div>
+            <div class="flex justify-between items-center pt-4 border-t border-gray-700">
+                <p id="modalBookId" class="text-sm text-gray-500"></p>
+                <button id="editFromModalBtn" class="cyber-button bg-gradient-to-r from-blue-500 to-cyan-400">
+                    <i class="fas fa-edit mr-2"></i> Edit Book
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="futuristic-card max-w-md w-full p-6">
+            <div class="text-center mb-6">
+                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                <h3 id="confirmTitle" class="text-xl font-bold text-gray-300 mb-2">Confirm Action</h3>
+                <p id="confirmMessage" class="text-gray-400">Are you sure you want to perform this action?</p>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmCancel" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                    Cancel
+                </button>
+                <button id="confirmAction" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="hidden fixed bottom-4 right-4 z-50">
+        <div class="futuristic-card px-6 py-4 flex items-center">
+            <i id="toastIcon" class="fas fa-check-circle text-2xl mr-3 text-green-500"></i>
+            <div>
+                <h4 id="toastTitle" class="font-bold text-white">Success</h4>
+                <p id="toastMessage" class="text-sm text-gray-300">Operation completed successfully</p>
+            </div>
+            <button id="toastClose" class="ml-6 text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api/v1';
+    let currentBookId = null;
+    let booksData = [];
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchBooks();
+        setupEventListeners();
+    });
+
+    // Set up all event listeners
+    function setupEventListeners() {
+        // Navigation buttons
+        document.getElementById('addBookBtn').addEventListener('click', showAddForm);
+        document.getElementById('addBookEmptyBtn').addEventListener('click', showAddForm);
+
+        // Form controls
+        document.getElementById('cancelAddBtn').addEventListener('click', hideAddForm);
+        document.getElementById('resetFormBtn').addEventListener('click', resetAddForm);
+        document.getElementById('editFromModalBtn').addEventListener('click', editFromModal);
+
+        // Form submissions
+        document.getElementById('bookFormElement').addEventListener('submit', handleAddBook);
+
+        // Search and filter
+        document.getElementById('searchBtn').addEventListener('click', triggerSearch);
+        document.getElementById('searchInput').addEventListener('input', debounce(triggerSearch, 300));
+
+        // Modal controls
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('toastClose').addEventListener('click', hideToast);
+
+        // Confirmation dialog
+        document.getElementById('confirmCancel').addEventListener('click', hideConfirmModal);
+    }
+
+    // Debounce function to limit API calls
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    // Show/hide loading spinner
+    function toggleLoading(show) {
+        document.getElementById('loading').classList.toggle('hidden', !show);
+    }
+
+    // Fetch and display books
+    async function fetchBooks() {
+        toggleLoading(true);
+        try {
+            const response = await axios.get(`${API_URL}/display`);
+            booksData = response.data;
+            displayBooks(booksData);
+        } catch (error) {
+            showError('Failed to load books. Please try again.');
+            console.error('Error fetching books:', error);
+        } finally {
+            toggleLoading(false);
+        }
+    }
+
+    // Display books with animation
+    function displayBooks(books) {
+        const bookList = document.getElementById('bookList');
+        const emptyState = document.getElementById('emptyState');
+
+        bookList.innerHTML = '';
+
+        if (books.length === 0) {
+            bookList.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        bookList.classList.remove('hidden');
+
+        books.forEach((book, index) => {
+            const card = document.createElement('div');
+            card.className = 'futuristic-card p-6 card-enter cursor-pointer';
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.onclick = () => showBookDetails(book);
+
+            const stockStatus = book.stock > 5 ? 'text-green-400' : book.stock > 0 ? 'text-yellow-400' : 'text-red-400';
+            const stockIcon = book.stock > 5 ? 'fa-check-circle' : book.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle';
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold text-white truncate" title="${book.bookName}">${book.bookName}</h3>
+                    <div class="flex items-center ${stockStatus}">
+                        <i class="fas ${stockIcon} mr-1"></i>
+                        <span>${book.stock}</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-400 mb-2 truncate" title="${book.author}">
+                    <i class="fas fa-user-edit mr-2"></i>${book.author}
+                </p>
+                <p class="text-sm text-gray-400 mb-4 truncate" title="ISBN: ${book.isbn}">
+                    <i class="fas fa-barcode mr-2"></i>${book.isbn}
+                </p>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-var(--neon)">$${book.price?.toFixed(2) || '0.00'}</span>
+                    <div class="flex space-x-2">
+                        <button onclick="event.stopPropagation(); prepareEditBook(${book.bookId})"
+                                class="w-8 h-8 flex items-center justify-center bg-blue-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all"
+                                title="Edit Book">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); confirmDeleteBook(${book.bookId})"
+                                class="w-8 h-8 flex items-center justify-center bg-red-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all"
+                                title="Delete Book">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            bookList.appendChild(card);
+        });
+    }
+
+    // Show book details modal
+    function showBookDetails(book) {
+        currentBookId = book.bookId;
+
+        const modal = document.getElementById('descriptionModal');
+        const publishDate = book.manufactureDate ? new Date(book.manufactureDate).toLocaleDateString() : 'Not specified';
+
+        document.getElementById('modalTitle').textContent = book.bookName;
+        document.getElementById('modalAuthor').textContent = book.author;
+        document.getElementById('modalIsbn').textContent = book.isbn;
+        document.getElementById('modalStock').textContent = `${book.stock} in stock`;
+        document.getElementById('modalPrice').textContent = `$${book.price?.toFixed(2) || '0.00'}`;
+        document.getElementById('modalDate').textContent = publishDate;
+        document.getElementById('modalDescription').textContent = book.details || 'No description available for this book.';
+        document.getElementById('modalBookId').textContent = `Book ID: ${book.bookId}`;
+
+        modal.classList.remove('hidden');
+    }
+
+    // Prepare to edit book from grid
+    function prepareEditBook(id) {
+        currentBookId = id;
+        showAddForm();
+        document.getElementById('bookId').value = id;
+
+        // Fetch book details and populate form
+        toggleLoading(true);
+        axios.get(`${API_URL}/displayOne/${id}`)
+            .then(response => {
+                const book = response.data;
+                document.getElementById('bookName').value = book.bookName || '';
+                document.getElementById('isbn').value = book.isbn || '';
+                document.getElementById('author').value = book.author || '';
+                document.getElementById('stock').value = book.stock || '';
+                document.getElementById('details').value = book.details || '';
+                document.getElementById('manufactureDate').value = book.manufactureDate || '';
+                document.getElementById('price').value = book.price || '';
+            })
+            .catch(error => {
+                showError('Failed to load book details. Please try again.');
+                console.error('Error fetching book:', error);
+            })
+            .finally(() => {
+                toggleLoading(false);
+            });
+    }
+
+    // Edit book from modal
+    function editFromModal() {
+        closeModal();
+        prepareEditBook(currentBookId);
+    }
+
+    // Confirm book deletion
+    function confirmDeleteBook(id) {
+        currentBookId = id;
+        showConfirmModal(
+            'Delete Book',
+            `Are you sure you want to delete book ID ${id} from Book Mart? This action cannot be undone.`,
+            performDeleteBook
+        );
+    }
+
+    // Perform book deletion
+    async function performDeleteBook() {
+        toggleLoading(true);
+        try {
+            await axios.delete(`${API_URL}/delete/${currentBookId}`);
+            showSuccess('Book deleted successfully from Book Mart');
+            fetchBooks();
+        } catch (error) {
+            showError('Failed to delete book. Please try again.');
+            console.error('Error deleting book:', error);
+        } finally {
+            toggleLoading(false);
+            hideConfirmModal();
+        }
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById('descriptionModal').classList.add('hidden');
+        currentBookId = null;
+    }
+
+    // Show add book form
+    function showAddForm() {
+        document.getElementById('bookForm').classList.remove('hidden');
+    }
+
+    // Reset add book form
+    function resetAddForm() {
+        document.getElementById('bookFormElement').reset();
+        document.getElementById('bookId').value = '';
+
+        // Remove invalid classes
+        ['bookName', 'isbn', 'author', 'stock', 'price'].forEach(id => {
+            document.getElementById(id).classList.remove('invalid');
+        });
+    }
+
+    // Hide add book form
+    function hideAddForm() {
+        document.getElementById('bookForm').classList.add('hidden');
+    }
+
+    // Handle add book form submission
+    async function handleAddBook(e) {
+        e.preventDefault();
+
+        const book = {
+            bookName: document.getElementById('bookName').value.trim(),
+            isbn: document.getElementById('isbn').value.trim(),
+            author: document.getElementById('author').value.trim(),
+            stock: parseInt(document.getElementById('stock').value) || 0,
+            details: document.getElementById('details').value.trim() || null,
+            manufactureDate: document.getElementById('manufactureDate').value || null,
+            price: parseFloat(document.getElementById('price').value) || 0
+        };
+
+        const bookId = document.getElementById('bookId').value;
+
+        // Validate form
+        if (!validateBookForm(book, 'bookFormElement')) return;
+
+        toggleLoading(true);
+
+        try {
+            if (bookId) {
+                // Update existing book
+                book.bookId = bookId;
+                await axios.put(`${API_URL}/update`, book);
+                showSuccess('Book updated successfully in Book Mart');
+            } else {
+                // Add new book
+                await axios.post(`${API_URL}/create`, book);
+                showSuccess('Book added successfully to Book Mart');
+            }
+            hideAddForm();
+            fetchBooks();
+        } catch (error) {
+            showError(bookId ? 'Failed to update book in Book Mart. Please try again.' : 'Failed to add book to Book Mart. Please try again.');
+            console.error('Error saving book:', error);
+        } finally {
+            toggleLoading(false);
+        }
+    }
+
+    // Validate book form
+    function validateBookForm(book, formId) {
+        let isValid = true;
+        const form = document.getElementById(formId);
+
+        // Reset invalid states
+        form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+
+        // Validate required fields
+        if (!book.bookName) {
+            document.getElementById('bookName').classList.add('invalid');
+            isValid = false;
+        }
+
+        if (!book.isbn) {
+            document.getElementById('isbn').classList.add('invalid');
+            isValid = false;
+        }
+
+        if (!book.author) {
+            document.getElementById('author').classList.add('invalid');
+            isValid = false;
+        }
+
+        if (book.price <= 0) {
+            document.getElementById('price').classList.add('invalid');
+            isValid = false;
+        }
+
+        if (book.stock < 0) {
+            document.getElementById('stock').classList.add('invalid');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            showError('Please fill in all required fields correctly');
+        }
+
+        return isValid;
+    }
+
+    // Trigger search
+    function triggerSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        searchBooks(query);
+    }
+
+    // Search books
+    async function searchBooks(query) {
+        toggleLoading(true);
+
+        try {
+            const response = query
+                ? await axios.get(`${API_URL}/search/${encodeURIComponent(query)}`)
+                : await axios.get(`${API_URL}/display`);
+
+            booksData = response.data;
+            displayBooks(booksData);
+        } catch (error) {
+            showError('Failed to search books in Book Mart. Please try again.');
+            console.error('Error searching books:', error);
+        } finally {
+            toggleLoading(false);
+        }
+    }
+
+    // Show confirmation modal
+    function showConfirmModal(title, message, callback) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmAction').onclick = callback;
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    // Hide confirmation modal
+    function hideConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    // Show success notification
+    function showSuccess(message) {
+        showToast('success', 'Success', message);
+    }
+
+    // Show error notification
+    function showError(message) {
+        showToast('error', 'Error', message);
+    }
+
+    // Show toast notification
+    function showToast(type, title, message) {
+        const toast = document.getElementById('toast');
+        const icon = document.getElementById('toastIcon');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Set icon and color based on type
+        if (type === 'success') {
+            icon.className = 'fas fa-check-circle text-2xl mr-3 text-green-500';
+        } else if (type === 'error') {
+            icon.className = 'fas fa-exclamation-circle text-2xl mr-3 text-red-500';
+        }
+
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+
+        // Auto-hide after 5 seconds
+        setTimeout(hideToast, 5000);
+    }
+
+    // Hide toast notification
+    function hideToast() {
+        document.getElementById('toast').classList.add('hidden');
+    }
+</script>
+</body>
+</html>
