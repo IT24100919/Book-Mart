@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book-Mart User Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .futuristic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .futuristic-card:hover::before {
+            opacity: 0.3;
+        }
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--neon);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .card-enter {
+            animation: cardEnter 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes cardEnter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-item {
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        .nav-item.active::after {
+            width: 100%;
+            background: var(--accent);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .input-field.invalid {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+        textarea.input-field {
+            min-height: 100px;
+            resize: vertical;
+        }
+        input[type="date"].input-field {
+            padding: 11px 16px;
+        }
+        input[type="number"].input-field {
+            -moz-appearance: textfield;
+        }
+        input[type="number"].input-field::-webkit-outer-spin-button,
+        input[type="number"].input-field::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-admin {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+        }
+        .role-librarian {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+        .role-member {
+            background: linear-gradient(45deg, #55efc4, #00b894);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- Navbar -->
+<nav class="futuristic-card sticky top-0 z-50 mx-4 mt-4">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-users-cog text-3xl text-var(--neon) neon-text"></i>
+                <h1 class="text-3xl font-bold logo-text">
+                    User<span class="font-extrabold">Management</span>
+                </h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6" id="desktopNav">
+                <a href="/home.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="/index.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-book mr-2"></i> Inventory
+                </a>
+                <a href="/user.html" class="nav-item text-white hover:text-var(--neon) active admin-only">
+                    <i class="fas fa-users-cog mr-2"></i> User Portal
+                </a>
+                <a href="/admin.html" class="nav-item text-white hover:text-var(--neon) admin-only">
+                    <i class="fas fa-user-shield mr-2"></i> Admin Portal
+                </a>
+
+                <!-- 👇 Added Profile Link -->
+                <a href="/profile.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-user-circle mr-2"></i> Profile
+                </a>
+
+                <a href="/login.html" class="nav-item text-white hover:text-var(--neon) login-link">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Login
+                </a>
+                <button id="logoutBtn" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 hidden">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+                <button id="addUserBtn" class="cyber-button">
+                    <i class="fas fa-plus mr-2"></i> Add User
+                </button>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden md:hidden futuristic-card mx-4 mt-2 p-4">
+    <div class="flex flex-col space-y-3">
+        <a href="/home.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-home mr-2"></i> Home
+        </a>
+        <a href="/index.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-book mr-2"></i> Inventory
+        </a>
+        <a href="/user.html" class="nav-item text-white hover:text-var(--neon) active admin-only">
+            <i class="fas fa-users-cog mr-2"></i> User Portal
+        </a>
+        <a href="/admin.html" class="nav-item text-white hover:text-var(--neon) admin-only">
+            <i class="fas fa-user-shield mr-2"></i> Admin Portal
+        </a>
+        <a href="/login.html" class="nav-item text-white hover:text-var(--neon) login-link">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+        </a>
+        <button id="mobileLogoutBtn" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 w-full hidden">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+        <button id="mobileAddUserBtn" class="cyber-button w-full">
+            <i class="fas fa-plus mr-2"></i> Add User
+        </button>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container mx-auto px-4 py-8">
+    <!-- Search and Filter Section -->
+    <div class="futuristic-card p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="search-box relative">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInput" class="input-field pl-10" placeholder="Search by email or ID...">
+            </div>
+            <div>
+                <select id="roleFilter" class="input-field">
+                    <option value="">All Roles</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="LIBRARIAN">Librarian</option>
+                    <option value="MEMBER">Member</option>
+                </select>
+            </div>
+            <button id="searchBtn" class="cyber-button">
+                <i class="fas fa-filter mr-2"></i> Filter
+            </button>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="futuristic-card overflow-hidden">
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                    <tr class="text-left border-b border-gray-700">
+                        <th class="pb-4">ID</th>
+                        <th class="pb-4">Name</th>
+                        <th class="pb-4">Email</th>
+                        <th class="pb-4">Role</th>
+                        <th class="pb-4">Status</th>
+                        <th class="pb-4">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                    <!-- Users will be loaded here -->
+                    <tr>
+                        <td colspan="6" class="text-center py-8">Loading users...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div id="userModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="futuristic-card w-full max-w-2xl mx-4">
+        <div class="flex justify-between items-center p-6 border-b border-gray-700">
+            <h3 class="text-2xl font-bold logo-text" id="modalTitle">Add New User</h3>
+            <button id="closeModalBtn" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block mb-2 text-gray-300">First Name</label>
+                        <input type="text" id="firstName" class="input-field" required>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-gray-300">Last Name</label>
+                        <input type="text" id="lastName" class="input-field" required>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-gray-300">Email</label>
+                    <input type="email" id="email" class="input-field" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-gray-300">Password</label>
+                    <input type="password" id="password" class="input-field" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-gray-300">Role</label>
+                    <select id="role" class="input-field" required>
+                        <option value="">Select Role</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="LIBRARIAN">Librarian</option>
+                        <option value="MEMBER">Member</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" id="cancelBtn" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">Cancel</button>
+                    <button type="submit" id="saveUserBtn" class="cyber-button">
+                        <i class="fas fa-save mr-2"></i> Save User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="futuristic-card w-full max-w-md mx-4">
+        <div class="p-6">
+            <h3 class="text-xl font-bold mb-4" id="confirmMessage">Are you sure you want to delete this user?</h3>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelConfirmBtn" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">Cancel</button>
+                <button id="confirmActionBtn" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500">
+                    <i class="fas fa-trash-alt mr-2"></i> Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables
+    let currentUser = null;
+    let users = [];
+    let isEditMode = false;
+    let userIdToDelete = null;
+
+    // DOM Ready
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+        loadUsers();
+        setupEventListeners();
+    });
+
+    // Check authentication status
+    function checkAuthStatus() {
+        const token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+        if (token) {
+            // User is logged in
+            document.querySelectorAll('.login-link').forEach(el => el.classList.add('hidden'));
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('mobileLogoutBtn').classList.remove('hidden');
+
+            // Show admin-only elements if user is admin
+            if (isAdmin) {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
+        } else {
+            // User is not logged in
+            document.querySelectorAll('.login-link').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('mobileLogoutBtn').classList.add('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        }
+    }
+
+    // Load all users - UPDATED TO PROPERLY HANDLE RESPONSE
+    function loadUsers() {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        axios.get('/api/v2/display', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            // Handle different possible response structures
+            if (Array.isArray(response.data)) {
+                users = response.data;
+            } else if (response.data && Array.isArray(response.data.users)) {
+                users = response.data.users;
+            } else if (response.data && Array.isArray(response.data.data)) {
+                users = response.data.data;
+            } else {
+                users = [];
+                console.error('Unexpected API response structure:', response.data);
+            }
+
+            // Debug: Verify we're getting all fields
+            console.log('Loaded users:', users);
+            renderUsersTable();
+        })
+        .catch(error => {
+            console.error('Error loading users:', error);
+            if (error.response && error.response.status === 401) {
+                window.location.href = '/login.html';
+            } else {
+                alert('Failed to load users. Please try again.');
+            }
+        });
+    }
+
+    // Render users in table
+    function renderUsersTable(filteredUsers = null) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+
+        const usersToRender = filteredUsers || users;
+
+        if (usersToRender.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-8">No users found</td>
+                </tr>
+            `;
+            return;
+        }
+
+        usersToRender.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b border-gray-700 hover:bg-gray-800 hover:bg-opacity-30 transition-colors';
+
+            // Determine role badge class
+            let roleBadgeClass = '';
+            let roleText = '';
+            switch(user.role) {
+                case 'ADMIN':
+                    roleBadgeClass = 'role-admin';
+                    roleText = 'Admin';
+                    break;
+                case 'LIBRARIAN':
+                    roleBadgeClass = 'role-librarian';
+                    roleText = 'Librarian';
+                    break;
+                case 'MEMBER':
+                    roleBadgeClass = 'role-member';
+                    roleText = 'Member';
+                    break;
+                default:
+                    roleBadgeClass = 'role-member';
+                    roleText = user.role || 'Member';
+            }
+
+            tr.innerHTML = `
+                <td class="py-4">${user.userId || user.id || 'N/A'}</td>
+                <td class="py-4">${user.firstName || ''} ${user.lastName || ''}</td>
+                <td class="py-4">${user.email || 'N/A'}</td>
+                <td class="py-4"><span class="role-badge ${roleBadgeClass}">${roleText}</span></td>
+                <td class="py-4">${user.active ? 'Active' : 'Inactive'}</td>
+                <td class="py-4">
+                    <div class="flex space-x-2">
+                        <button class="edit-user-btn w-8 h-8 flex items-center justify-center bg-blue-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all"
+                                data-user-id="${user.userId || user.id}" title="Edit">
+                            <i class="fas fa-edit text-sm"></i>
+                        </button>
+                        <button class="delete-user-btn w-8 h-8 flex items-center justify-center bg-red-900 bg-opacity-50 hover:bg-opacity-70 rounded-full transition-all"
+                                data-user-id="${user.userId || user.id}" title="Delete">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // Logout buttons
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('mobileLogoutBtn').addEventListener('click', logout);
+
+        // Add user buttons
+        document.getElementById('addUserBtn').addEventListener('click', openAddUserModal);
+        document.getElementById('mobileAddUserBtn').addEventListener('click', openAddUserModal);
+
+        // Modal controls
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelConfirmBtn').addEventListener('click', closeConfirmModal);
+
+        // Form submission
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveUser();
+        });
+
+        // Search and filter
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+
+            let filteredUsers = users;
+
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(user =>
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.firstName && user.firstName.toLowerCase().includes(searchTerm)) ||
+                    (user.lastName && user.lastName.toLowerCase().includes(searchTerm)) ||
+                    String(user.userId || user.id).includes(searchTerm)
+                );
+            }
+
+            if (roleFilter) {
+                filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
+            }
+
+            renderUsersTable(filteredUsers);
+        });
+
+        // Delegated events for edit/delete buttons
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.edit-user-btn')) {
+                const userId = e.target.closest('.edit-user-btn').getAttribute('data-user-id');
+                editUser(userId);
+            }
+
+            if (e.target.closest('.delete-user-btn')) {
+                const userId = e.target.closest('.delete-user-btn').getAttribute('data-user-id');
+                confirmDeleteUser(userId);
+            }
+        });
+
+        // Confirm action
+        document.getElementById('confirmActionBtn').addEventListener('click', function() {
+            if (userIdToDelete) {
+                deleteUser(userIdToDelete);
+            }
+        });
+    }
+
+    // Open add user modal
+    function openAddUserModal() {
+        isEditMode = false;
+        document.getElementById('modalTitle').textContent = 'Add New User';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('password').required = true;
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    // Open edit user modal
+    function editUser(userId) {
+        const user = users.find(u => u.userId == userId || u.id == userId);
+        if (!user) {
+            console.error('User not found with ID:', userId);
+            return;
+        }
+
+        isEditMode = true;
+        document.getElementById('modalTitle').textContent = 'Edit User';
+        document.getElementById('userId').value = user.userId || user.id;
+        document.getElementById('firstName').value = user.firstName || '';
+        document.getElementById('lastName').value = user.lastName || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('role').value = user.role || 'MEMBER';
+        document.getElementById('password').required = false;
+        document.getElementById('password').placeholder = 'Leave blank to keep current password';
+
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    // Close modal
+    function closeModal() {
+        document.getElementById('userModal').classList.add('hidden');
+    }
+
+    // Close confirmation modal
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        userIdToDelete = null;
+    }
+
+    // Confirm delete user
+    function confirmDeleteUser(userId) {
+        userIdToDelete = userId;
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    // Save user (add or edit)
+    function saveUser() {
+        const token = localStorage.getItem('token');
+        const userId = document.getElementById('userId').value;
+        const formData = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            role: document.getElementById('role').value
+        };
+
+        // Include password only if in add mode or if password field is not empty
+        const password = document.getElementById('password').value;
+        if (!isEditMode || password) {
+            formData.password = password;
+        }
+
+        const url = isEditMode ? `/api/v2/update` : '/api/v2/register';
+        const method = isEditMode ? 'PUT' : 'POST';
+
+        // For edit mode, include the userId in the body
+        if (isEditMode) {
+            formData.userId = userId;
+        }
+
+        axios({
+            method: method,
+            url: url,
+            data: formData,
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            alert(`User ${isEditMode ? 'updated' : 'created'} successfully!`);
+            closeModal();
+            loadUsers();
+        })
+        .catch(error => {
+            console.error('Error saving user:', error);
+            alert(`Failed to ${isEditMode ? 'update' : 'create'} user: ${error.response?.data?.message || error.message}`);
+        });
+    }
+
+    // Delete user
+    function deleteUser(userId) {
+        const token = localStorage.getItem('token');
+
+        axios.delete(`/api/v2/delete/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            alert('User deleted successfully!');
+            closeConfirmModal();
+            loadUsers();
+        })
+        .catch(error => {
+            console.error('Error deleting user:', error);
+            alert(`Failed to delete user: ${error.response?.data?.message || error.message}`);
+        });
+    }
+
+    // Logout
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAdmin');
+        window.location.href = '/login.html';
+    }
+</script>
+</body>
+</html>

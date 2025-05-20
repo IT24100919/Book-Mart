@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book-Mart Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --neon: #00cec9;
+        }
+
+        body {
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9)),
+                        url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-4.1.0&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--light);
+            min-height: 100vh;
+        }
+
+        .futuristic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .futuristic-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--neon));
+            z-index: -1;
+            border-radius: 18px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .futuristic-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.6);
+        }
+
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+
+        .cyber-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .cyber-button:hover::after {
+            transform: translateX(100%);
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--neon);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 50%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+
+        .card-enter {
+            animation: cardEnter 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes cardEnter {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon);
+            box-shadow: 0 0 0 2px rgba(0, 206, 201, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-field.invalid {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-admin {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+        }
+
+        .role-librarian {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .role-member {
+            background: linear-gradient(45deg, #55efc4, #00b894);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+
+        .status-processing {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .status-completed {
+            background: linear-gradient(45deg, #55efc4, #00b894);
+        }
+
+        .status-cancelled {
+            background: linear-gradient(45deg, #ff7675, #d63031);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: rgba(108, 92, 231, 0.3);
+            color: white;
+            border-bottom: 2px solid var(--neon);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="futuristic-card sticky top-0 z-50 mx-4 mt-4">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-user-shield text-3xl text-var(--neon) neon-text"></i>
+                <h1 class="text-3xl font-bold logo-text">
+                    Book<span class="font-extrabold">Mart</span> Admin
+                </h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="home.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="#" class="nav-item text-white hover:text-var(--neon)" id="dashboardTab">
+                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item text-white hover:text-var(--neon)" id="usersTab">
+                    <i class="fas fa-users mr-2"></i> Users
+                </a>
+                <a href="#" class="nav-item text-white hover:text-var(--neon)" id="ordersTab">
+                    <i class="fas fa-shopping-cart mr-2"></i> Orders
+                </a>
+
+                <!-- 👇 Added Profile Link -->
+                <a href="profile.html" class="nav-item text-white hover:text-var(--neon)">
+                    <i class="fas fa-user-circle mr-2"></i> Profile
+                </a>
+
+                <button class="cyber-button bg-gradient-to-r from-red-500 to-pink-500" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </div>
+            <button class="md:hidden text-white focus:outline-none" id="mobileMenuBtn">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden md:hidden futuristic-card mx-4 mt-2 p-4">
+    <div class="flex flex-col space-y-3">
+        <a href="home.html" class="nav-item text-white hover:text-var(--neon)">
+            <i class="fas fa-home mr-2"></i> Home
+        </a>
+        <a href="#" class="nav-item text-white hover:text-var(--neon)" id="mobileDashboardTab">
+            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+        </a>
+        <a href="#" class="nav-item text-white hover:text-var(--neon)" id="mobileUsersTab">
+            <i class="fas fa-users mr-2"></i> Users
+        </a>
+        <a href="#" class="nav-item text-white hover:text-var(--neon)" id="mobileOrdersTab">
+            <i class="fas fa-shopping-cart mr-2"></i> Orders
+        </a>
+        <button class="cyber-button bg-gradient-to-r from-red-500 to-pink-500 w-full" id="mobileLogoutBtn">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container mx-auto px-4 py-8">
+    <!-- Dashboard Section -->
+    <div id="dashboardSection">
+        <!-- Admin Dashboard Component -->
+        <div class="futuristic-card p-6 mb-6">
+            <h2 class="text-2xl font-bold logo-text mb-6">
+                <i class="fas fa-tachometer-alt mr-2"></i>Admin Dashboard
+            </h2>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="statsGrid">
+                <!-- Stats will be loaded dynamically -->
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Sales Chart -->
+                <div class="futuristic-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-white">
+                            <i class="fas fa-chart-line mr-2"></i>Sales Overview
+                        </h3>
+                        <select id="salesTimeframe" class="input-field bg-gray-800 text-sm py-1 px-2 w-auto">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- User Growth Chart -->
+                <div class="futuristic-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-white">
+                            <i class="fas fa-users mr-2"></i>User Growth
+                        </h3>
+                        <select id="usersTimeframe" class="input-field bg-gray-800 text-sm py-1 px-2 w-auto">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30" selected>Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="usersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="futuristic-card p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">
+                        <i class="fas fa-history mr-2"></i>Recent Activity
+                    </h3>
+                    <button class="text-sm text-var(--neon) hover:underline" id="refreshActivity">Refresh</button>
+                </div>
+
+                <div class="space-y-4" id="activityFeed">
+                    <!-- Activity items will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Section -->
+    <div id="usersSection" class="hidden">
+        <!-- User Management Panel -->
+        <div class="futuristic-card p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold logo-text">
+                    <i class="fas fa-users-cog mr-2"></i>User Management
+                </h2>
+                <div class="flex space-x-4">
+                    <button class="cyber-button" id="exportUsersBtn">
+                        <i class="fas fa-file-export mr-2"></i> Export
+                    </button>
+                    <button class="cyber-button" id="addUserBtn">
+                        <i class="fas fa-plus mr-2"></i> Add User
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="futuristic-card p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Search</label>
+                        <div class="relative">
+                            <input type="text" id="userSearch" class="input-field pl-10" placeholder="Search users...">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Role</label>
+                        <select id="userRoleFilter" class="input-field">
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="member">Member</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                        <select id="userStatusFilter" class="input-field">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="usersLoading" class="hidden flex justify-center my-8">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- User Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full" id="usersTable">
+                    <thead>
+                    <tr class="border-b border-gray-700 text-left">
+                        <th class="pb-3 px-4 text-gray-400 font-semibold cursor-pointer" onclick="sortUsers('id')">
+                            ID <i class="fas fa-sort ml-1" id="sortIdIcon"></i>
+                        </th>
+                        <th class="pb-3 px-4 text-gray-400 font-semibold cursor-pointer" onclick="sortUsers('username')">
+                            Username <i class="fas fa-sort ml-1" id="sortUsernameIcon"></i>
+                        </th>
+                        <th class="pb-3 px-4 text-gray-400 font-semibold">Email</th>
+                        <th class="pb-3 px-4 text-gray-400 font-semibold cursor-pointer" onclick="sortUsers('role')">
+                            Role <i class="fas fa-sort ml-1" id="sortRoleIcon"></i>
+                        </th>
+                        <th class="pb-3 px-4 text-gray-400 font-semibold cursor-pointer" onclick="sortUsers('status')">
+                            Status <i class="fas fa-sort ml-1" id="sortStatusIcon"></i>
+                        </th>
+                        <th class="pb-3 px-4 text-gray-400 font-semibold">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                    <!-- Users will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-400" id="usersPaginationInfo">
+                    Loading users...
+                </div>
+                <div class="flex space-x-2" id="usersPagination">
+                    <!-- Pagination buttons will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit User Modal -->
+        <div id="userModal" class="hidden modal-overlay">
+            <div class="futuristic-card max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold logo-text" id="userModalTitle">
+                        <i class="fas fa-user-plus mr-2"></i> Add New User
+                    </h2>
+                    <button id="closeUserModal" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <form id="userForm" class="space-y-6">
+                    <input type="hidden" id="userId">
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-user mr-2 text-var(--primary)"></i>Username *
+                            </label>
+                            <input id="username" type="text" class="input-field w-full" placeholder="Enter username" required>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-envelope mr-2 text-var(--primary)"></i>Email *
+                            </label>
+                            <input id="email" type="email" class="input-field w-full" placeholder="Enter email address" required>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-lock mr-2 text-var(--primary)"></i>Password *
+                            </label>
+                            <input id="password" type="password" class="input-field w-full" placeholder="Enter password" required>
+                            <p class="text-xs text-gray-500 mt-1">At least 8 characters</p>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-user-tag mr-2 text-var(--primary)"></i>Role *
+                            </label>
+                            <select id="role" class="input-field w-full">
+                                <option value="member">Member</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-semibold mb-2 text-gray-300">
+                                <i class="fas fa-toggle-on mr-2 text-var(--primary)"></i>Status
+                            </label>
+                            <div class="flex items-center">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="active" class="sr-only peer" checked>
+                                    <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                    <span class="ms-3 text-sm font-medium text-gray-300">Active</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4 pt-4">
+                        <button type="button" id="resetUserForm" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                            <i class="fas fa-undo mr-2"></i> Reset
+                        </button>
+                        <button type="submit" class="cyber-button" id="submitUserBtn">
+                            <i class="fas fa-save mr-2"></i> Save User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteUserModal" class="hidden modal-overlay">
+            <div class="futuristic-card max-w-md w-full p-6 modal anticipated modal-content">
+                <div class="text-center mb-6">
+                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-300 mb-2">Confirm Deletion</h3>
+                    <p class="text-gray-400">Are you sure you want to delete this user? This action cannot be undone.</p>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="cancelDeleteUser" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-all duration-300">
+                        Cancel
+                    </button>
+                    <button id="confirmDeleteUser" class="cyber-button bg-gradient-to-r from-red-500 to-pink-500">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div id="ordersSection" class="hidden">
+        <!-- Order Management Panel -->
+        <div class="futuristic-card p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold logo-text">
+                    <i class="fas fa-shopping-cart mr-2"></i>Order Management
+                </h2>
+                <div class="flex space-x-4">
+                    <div class="relative">
+                        <select id="orderStatusFilter" class="input-field appearance-none pr-8">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button class="cyber-button bg-gradient-to-r from-green-500 to-teal-400" id="newOrderBtn">
+                        <i class="fas fa-plus mr-2"></i> New Order
+                    </button>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex space-x-2">
+                    <button class="w-8 h-8 flex items-center justify-center bg-var(--primary) bg-opacity-50 rounded-md transition-all view-toggle active"
+                            data-view="grid" title="Grid View">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-md transition-all view-toggle"
+                            data-view="list" title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                <div class="relative w-64">
+                    <input type="text" id="orderSearch" class="input-field pl-10" placeholder="Search orders...">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="ordersLoading" class="hidden flex justify-center my-8">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Orders Grid View -->
+            <div id="ordersGridView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Orders will be loaded dynamically -->
+            </div>
+
+            <!-- Orders List View -->
+            <div id="ordersListView" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="ordersTable">
+                        <thead>
+                        <tr class="border-b border-gray-700 text-left">
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Order ID</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Customer</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Items</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Total</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Date</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Status</th>
+                            <th class="pb-3 px-4 text-gray-400 font-semibold">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                        <!-- Orders will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-400" id="ordersPaginationInfo">
+                    Loading orders...
+                </div>
+                <div class="flex space-x-2" id="ordersPagination">
+                    <!-- Pagination buttons will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Details Modal -->
+        <div id="orderModal" class="hidden modal-overlay">
+            <div class="futuristic-card max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto modal-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold logo-text" id="orderModalTitle">
+                        Order Details
+                    </h2>
+                    <button id="closeOrderModal" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="md:col-span-2">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-white mb-3">Customer Information</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-gray-400 text-sm">Name</p>
+                                    <p class="text-white font-medium" id="customerName">Loading...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 text-sm">Email</p>
+                                    <p class="text-white font-medium" id="customerEmail">Loading...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 text-sm">Phone</p>
+                                    <p class="text-white font-medium" id="customerPhone">Loading...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 text-sm">Address</p>
+                                    <p class="text-white font-medium" id="customerAddress">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-bold text-white mb-3">Order Items</h3>
+                            <div class="futuristic-card p-4">
+                                <table class="w-full" id="orderItemsTable">
+                                    <thead>
+                                    <tr class="border-b border-gray-700 text-left">
+                                        <th class="pb-2 px-2 text-gray-400 text-sm font-semibold">Item</th>
+                                        <th class="pb-2 px-2 text-gray-400 text-sm font-semibold text-right">Price</th>
+                                        <th class="pb-2 px-2 text-gray-400 text-sm font-semibold text-right">Qty</th>
+                                        <th class="pb-2 px-2 text-gray-400 text-sm font-semibold text-right">Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="orderItemsBody">
+                                    <!-- Order items will be loaded dynamically -->
+                                    </tbody>
+                                    <tfoot>
+                                    <tr class="border-t border-gray-700">
+                                        <td colspan="3" class="pt-2 px-2 text-gray-400 text-sm font-semibold text-right">Subtotal</td>
+                                        <td class="pt-2 px-2 text-white text-sm font-semibold text-right" id="orderSubtotal">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="px-2 text-gray-400 text-sm font-semibold text-right">Shipping</td>
+                                        <td class="px-2 text-white text-sm font-semibold text-right" id="orderShipping">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="px-2 text-gray-400 text-sm font-semibold text-right">Tax</td>
+                                        <td class="px-2 text-white text-sm font-semibold text-right" id="orderTax">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="pt-2 px-2 text-gray-400 text-sm font-semibold text-right">Total</td>
+                                        <td class="pt-2 px-2 text-white text-lg font-bold text-right" id="orderTotal">$0.00</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="futuristic-card p-4 mb-6">
+                            <h3 class="text-lg font-bold text-white mb-3">Order Summary</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-gray-400 text-sm">Order ID</p>
+                                    <p class="text-white font-medium" id="orderId">#0000</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 text-sm">Date</p>
+                                    <p class="text-white font-medium" id="orderDate">Loading...</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 text-sm">Status</p>
+                                    <div id="orderStatusBadge" class="mt-1">
+                                        <span class="status-badge status-pending">Pending</span>
+                                    </div>
+                                </div>
+                                <div class="pt-3">
+                                    <label class="block text-gray-400 text-sm mb-2">Update Status</label>
+                                    <select id="updateOrderStatus" class="input-field w-full">
+                                        <option value="pending">Pending</option>
+                                        <option value="processing">Processing</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="futuristic-card p-4">
+                            <h3 class="text-lg font-bold text-white mb-3">Order Actions</h3>
+                            <div class="space-y-2">
+                                <button class="cyber-button w-full bg-gradient-to-r from-blue-500 to-cyan-400" id="updateStatusBtn">
+                                    <i class="fas fa-sync-alt mr-2"></i> Update Status
+                                </button>
+                                <button class="cyber-button w-full bg-gradient-to-r from-red-500 to-pink-500" id="cancelOrderBtn">
+                                    <i class="fas fa-ban mr-2"></i> Cancel Order
+                                </button>
+                                <button class="cyber-button w-full bg-gradient-to-r from-yellow-500 to-orange-400" id="viewHistoryBtn">
+                                    <i class="fas fa-history mr-2"></i> View Order History
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    // API Base URL
+    const API_BASE_URL = 'http://localhost:8080/api/v3';
+
+    // Chart instances
+    let salesChart, usersChart;
+
+    // Tab Navigation
+    const sections = {
+        dashboard: document.getElementById('dashboardSection'),
+        users: document.getElementById('usersSection'),
+        orders: document.getElementById('ordersSection')
+    };
+
+    function showSection(section) {
+        Object.values(sections).forEach(s => s.classList.add('hidden'));
+        sections[section].classList.remove('hidden');
+        if (section === 'dashboard') loadDashboard();
+        else if (section === 'users') loadUsers();
+        else if (section === 'orders') loadOrders();
+    }
+
+    document.getElementById('dashboardTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('dashboard');
+    });
+    document.getElementById('usersTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('users');
+    });
+    document.getElementById('ordersTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('orders');
+    });
+    document.getElementById('mobileDashboardTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('dashboard');
+        toggleMobileMenu();
+    });
+    document.getElementById('mobileUsersTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('users');
+        toggleMobileMenu();
+    });
+    document.getElementById('mobileOrdersTab').addEventListener('click', e => {
+        e.preventDefault();
+        showSection('orders');
+        toggleMobileMenu();
+    });
+
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    function toggleMobileMenu() {
+        mobileMenu.classList.toggle('hidden');
+    }
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+    // Logout (Placeholder)
+    document.getElementById('logoutBtn').addEventListener('click', () => alert('Logout functionality not implemented'));
+    document.getElementById('mobileLogoutBtn').addEventListener('click', () => {
+        alert('Logout functionality not implemented');
+        toggleMobileMenu();
+    });
+
+    // Dashboard Functions
+    async function loadDashboard() {
+        try {
+            // Load Stats
+            const statsResponse = await axios.get(`${API_BASE_URL}/stats`);
+            const stats = statsResponse.data;
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="futuristic-card p-6 card-enter">
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fas fa-users mr-2"></i>Total Users</h3>
+                    <p class="text-3xl font-bold neon-text">${stats.totalUsers}</p>
+                </div>
+                <div class="futuristic-card p-6 card-enter" style="animation-delay: 0.1s">
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fas fa-shopping-cart mr-2"></i>Total Orders</h3>
+                    <p class="text-3xl font-bold neon-text">${stats.totalOrders}</p>
+                </div>
+                <div class="futuristic-card p-6 card-enter" style="animation-delay: 0.2s">
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fas fa-dollar-sign mr-2"></i>Revenue</h3>
+                    <p class="text-3xl font-bold neon-text">$${stats.revenue}</p>
+                </div>
+                <div class="futuristic-card p-6 card-enter" style="animation-delay: 0.3s">
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fas fa-book mr-2"></i>Total Books</h3>
+                    <p class="text-3xl font-bold neon-text">${stats.totalBooks}</p>
+                </div>
+            `;
+
+            // Load Sales Chart
+            const salesTimeframe = document.getElementById('salesTimeframe').value;
+            const salesData = await axios.get(`${API_BASE_URL}/sales?days=${salesTimeframe}`);
+            if (salesChart) salesChart.destroy();
+            salesChart = new Chart(document.getElementById('salesChart'), {
+                type: 'line',
+                data: {
+                    labels: salesData.data.labels,
+                    datasets: [{
+                        label: 'Sales ($)',
+                        data: salesData.data.values,
+                        borderColor: '#00cec9',
+                        backgroundColor: 'rgba(0, 206, 201, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Load User Growth Chart
+            const usersTimeframe = document.getElementById('usersTimeframe').value;
+            const usersData = await axios.get(`${API_BASE_URL}/user-growth?days=${usersTimeframe}`);
+            if (usersChart) usersChart.destroy();
+            usersChart = new Chart(document.getElementById('usersChart'), {
+                type: 'line',
+                data: {
+                    labels: usersData.data.labels,
+                    datasets: [{
+                        label: 'New Users',
+                        data: usersData.data.values,
+                        borderColor: '#fd79a8',
+                        backgroundColor: 'rgba(253, 121, 168, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Load Recent Activity
+            const activityResponse = await axios.get(`${API_BASE_URL}/activities`);
+            document.getElementById('activityFeed').innerHTML = activityResponse.data.map(activity => `
+                <div class="flex items-center space-x-3 card-enter">
+                    <i class="fas fa-${activity.icon} text-var(--neon) text-xl"></i>
+                    <div>
+                        <p class="text-white">${activity.description}</p>
+                        <p class="text-gray-400 text-sm">${new Date(activity.timestamp).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            alert('Failed to load dashboard data');
+        }
+    }
+
+    document.getElementById('salesTimeframe').addEventListener('change', loadDashboard);
+    document.getElementById('usersTimeframe').addEventListener('change', loadDashboard);
+    document.getElementById('refreshActivity').addEventListener('click', loadDashboard);
+
+    // User Maznagement
+    let users = [];
+    let currentPage = 1;
+    const usersPerPage = 10;
+
+    async function loadUsers(page = 1) {
+        try {
+            document.getElementById('usersLoading').classList.remove('hidden');
+            const search = document.getElementById('userSearch').value;
+            const role = document.getElementById('userRoleFilter').value;
+            const status = document.getElementById('userStatusFilter').value;
+            const response = await axios.get(`${API_BASE_URL}/admins`, {
+                params: { search, role, status, page, size: usersPerPage }
+            });
+            users = response.data.content;
+            const totalPages = response.data.totalPages;
+
+            document.getElementById('usersTableBody').innerHTML = users.map(user => `
+                <tr class="border-b border-gray-700 hover:bg-gray-800">
+                    <td class="py-3 px-4 text-white">${user.id}</td>
+                    <td class="py-3 px-4 text-white">${user.username}</td>
+                    <td class="py-3 px-4 text-white">${user.email}</td>
+                    <td class="py-3 px-4">
+                        <span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="status-badge status-${user.active ? 'completed' : 'cancelled'}">
+                            ${user.active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <button onclick="editUser(${user.id})" class="text-blue-400 hover:text-blue-300 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser(${user.id})" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('usersPaginationInfo').textContent = `Showing ${(page - 1) * usersPerPage + 1} to ${Math.min(page * usersPerPage, response.data.totalElements)} of ${response.data.totalElements} users`;
+            document.getElementById('usersPagination').innerHTML = Array.from({ length: totalPages }, (_, i) => `
+                <button class="px-3 py-1 rounded-md ${i + 1 === page ? 'bg-var(--neon)' : 'bg-gray-700 hover:bg-gray-600'} text-white"
+                        onclick="loadUsers(${i + 1})">${i + 1}</button>
+            `).join('');
+
+            document.getElementById('usersLoading').classList.add('hidden');
+        } catch (error) {
+            console.error('Error loading users:', error);
+            alert('Failed to load users');
+            document.getElementById('usersLoading').classList.add('hidden');
+        }
+    }
+
+    function sortUsers(field) {
+        const sortIcons = {
+            id: document.getElementById('sortIdIcon'),
+            username: document.getElementById('sortUsernameIcon'),
+            role: document.getElementById('sortRoleIcon'),
+            status: document.getElementById('sortStatusIcon')
+        };
+        const currentDirection = sortIcons[field].classList.contains('fa-sort-up') ? 'desc' : 'asc';
+        users.sort((a, b) => {
+            const valA = field === 'status' ? a.active : a[field];
+            const valB = field === 'status' ? b.active : b[field];
+            if (currentDirection === 'asc') return valA > valB ? 1 : -1;
+            return valA < valB ? 1 : -1;
+        });
+        Object.values(sortIcons).forEach(icon => icon.className = 'fas fa-sort ml-1');
+        sortIcons[field].className = `fas fa-sort-${currentDirection === 'asc' ? 'up' : 'down'} ml-1`;
+        loadUsers(currentPage);
+    }
+
+    document.getElementById('userSearch').addEventListener('input', () => loadUsers(1));
+    document.getElementById('userRoleFilter').addEventListener('change', () => loadUsers(1));
+    document.getElementById('userStatusFilter').addEventListener('change', () => loadUsers(1));
+    document.getElementById('addUserBtn').addEventListener('click', () => {
+        document.getElementById('userModalTitle').textContent = 'Add New User';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('userModal').classList.remove('hidden');
+    });
+
+    document.getElementById('closeUserModal').addEventListener('click', () => {
+        document.getElementById('userModal').classList.add('hidden');
+    });
+
+    document.getElementById('resetUserForm').addEventListener('click', () => {
+        document.getElementById('userForm').reset();
+    });
+
+    document.getElementById('userForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const user = {
+            id: document.getElementById('userId').value,
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value,
+            active: document.getElementById('active').checked
+        };
+        try {
+            if (user.id) {
+                await axios.put(`${API_BASE_URL}/admins/${user.id}`, user);
+            } else {
+                await axios.post(`${API_BASE_URL}/admins`, user);
+            }
+            document.getElementById('userModal').classList.add('hidden');
+            loadUsers(currentPage);
+        } catch (error) {
+            console.error('Error saving user:', error);
+            alert('Failed to save user');
+        }
+    });
+
+    function editUser(id) {
+        const user = users.find(u => u.id === id);
+        document.getElementById('userModalTitle').textContent = 'Edit User';
+        document.getElementById('userId').value = user.id;
+        document.getElementById('username').value = user.username;
+        document.getElementById('email').value = user.email;
+        document.getElementById('password').value = '';
+        document.getElementById('role').value = user.role.toLowerCase();
+        document.getElementById('active').checked = user.active;
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    function deleteUser(id) {
+        document.getElementById('confirmDeleteUser').onclick = async () => {
+            try {
+                await axios.delete(`${API_BASE_URL}/admins/${id}`);
+                document.getElementById('deleteUserModal').classList.add('hidden');
+                loadUsers(currentPage);
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user');
+            }
+        };
+        document.getElementById('deleteUserModal').classList.remove('hidden');
+    }
+
+    document.getElementById('cancelDeleteUser').addEventListener('click', () => {
+        document.getElementById('deleteUserModal').classList.add('hidden');
+    });
+
+    // Order Management
+    let orders = [];
+    let ordersCurrentPage = 1;
+    const ordersPerPage = 10;
+
+    async function loadOrders(page = 1) {
+        try {
+            document.getElementById('ordersLoading').classList.remove('hidden');
+            const search = document.getElementById('orderSearch').value;
+            const status = document.getElementById('orderStatusFilter').value;
+            const response = await axios.get(`${API_BASE_URL}/orders`, {
+                params: { search, status, page, size: ordersPerPage }
+            });
+            orders = response.data.content;
+            const totalPages = response.data.totalPages;
+
+            // Grid View
+            document.getElementById('ordersGridView').innerHTML = orders.map(order => `
+                <div class="futuristic-card p-6 card-enter">
+                    <h3 class="text-lg font-bold text-white mb-2">Order #${order.id}</h3>
+                    <p class="text-gray-400 text-sm mb-1">Customer: ${order.customerName}</p>
+                    <p class="text-gray-400 text-sm mb-1">Total: $${order.total}</p>
+                    <p class="text-gray-400 text-sm mb-3">Date: ${new Date(order.date).toLocaleDateString()}</p>
+                    <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                    <div class="mt-4 flex space-x-2">
+                        <button onclick="viewOrder(${order.id})" class="cyber-button flex-1">
+                            <i class="fas fa-eye mr-2"></i> View
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // List View
+            document.getElementById('ordersTableBody').innerHTML = orders.map(order => `
+                <tr class="border-b border-gray-700 hover:bg-gray-800">
+                    <td class="py-3 px-4 text-white">${order.id}</td>
+                    <td class="py-3 px-4 text-white">${order.customerName}</td>
+                    <td class="py-3 px-4 text-white">${order.items.length} items</td>
+                    <td class="py-3 px-4 text-white">$${order.total}</td>
+                    <td class="py-3 px-4 text-white">${new Date(order.date).toLocaleDateString()}</td>
+                    <td class="py-3 px-4">
+                        <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <button onclick="viewOrder(${order.id})" class="text-blue-400 hover:text-blue-300 mr-3">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('ordersPaginationInfo').textContent = `Showing ${(page - 1) * ordersPerPage + 1} to ${Math.min(page * ordersPerPage, response.data.totalElements)} of ${response.data.totalElements} orders`;
+            document.getElementById('ordersPagination').innerHTML = Array.from({ length: totalPages }, (_, i) => `
+                < shinichi class="px-3 py-1 rounded-md ${i + 1 === page ? 'bg-var(--neon)' : 'bg-gray-700 hover:bg-gray-600'} text-white"
+                        onclick="loadOrders(${i + 1})">${i + 1}</button>
+            `).join('');
+
+            document.getElementById('ordersLoading').classList.add('hidden');
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            alert('Failed to load orders');
+            document.getElementById('ordersLoading').classList.add('hidden');
+        }
+    }
+
+    document.getElementById('orderSearch').addEventListener('input', () => loadOrders(1));
+    document.getElementById('orderStatusFilter').addEventListener('change', () => loadOrders(1));
+    document.getElementById('newOrderBtn').addEventListener('click', () => alert('New order functionality not implemented'));
+
+    // View Toggle
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    viewToggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            viewToggles.forEach(t => t.classList.remove('active'));
+            toggle.classList.add('active');
+            const view = toggle.dataset.view;
+            document.getElementById('ordersGridView').classList.toggle('hidden', view !== 'grid');
+            document.getElementById('ordersListView').classList.toggle('hidden', view !== 'list');
+        });
+    });
+
+    async function viewOrder(id) {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/orders/${id}`);
+            const order = response.data;
+            document.getElementById('orderModalTitle').textContent = `Order #${order.id}`;
+            document.getElementById('customerName').textContent = order.customerName;
+            document.getElementById('customerEmail').textContent = order.customerEmail;
+            document.getElementById('customerPhone').textContent = order.customerPhone || 'N/A';
+            document.getElementById('customerAddress').textContent = order.customerAddress;
+            document.getElementById('orderId').textContent = `#${order.id}`;
+            document.getElementById('orderDate').textContent = new Date(order.date).toLocaleString();
+            document.getElementById('orderStatusBadge').innerHTML = `<span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>`;
+            document.getElementById('updateOrderStatus').value = order.status.toLowerCase();
+            document.getElementById('orderItemsBody').innerHTML = order.items.map(item => `
+                <tr>
+                    <td class="py-2 px-2 text-white text-sm">${item.name}</td>
+                    <td class="py-2 px-2 text-white text-sm text-right">$${item.price}</td>
+                    <td class="py-2 px-2 text-white text-sm text-right">${item.quantity}</td>
+                    <td class="py-2 px-2 text-white text-sm text-right">$${item.price * item.quantity}</td>
+                </tr>
+            `).join('');
+            document.getElementById('orderSubtotal').textContent = `$${order.subtotal}`;
+            document.getElementById('orderShipping').textContent = `$${order.shipping}`;
+            document.getElementById('orderTax').textContent = `$${order.tax}`;
+            document.getElementById('orderTotal').textContent = `$${order.total}`;
+            document.getElementById('orderModal').classList.remove('hidden');
+        } catch (error) {
+            console.error('Error loading order:', error);
+            alert('Failed to load order details');
+        }
+    }
+
+    document.getElementById('closeOrderModal').addEventListener('click', () => {
+        document.getElementById('orderModal').classList.add('hidden');
+    });
+
+    document.getElementById('updateStatusBtn').addEventListener('click', async () => {
+        const orderId = document.getElementById('orderId').textContent.replace('#', '');
+        const status = document.getElementById('updateOrderStatus').value;
+        try {
+            await axios.put(`${API_BASE_URL}/orders/${orderId}`, { status });
+            document.getElementById('orderModal').classList.add('hidden');
+            loadOrders(ordersCurrentPage);
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            alert('Failed to update order status');
+        }
+    });
+
+    document.getElementById('cancelOrderBtn').addEventListener('click', async () => {
+        const orderId = document.getElementById('orderId').textContent.replace('#', '');
+        try {
+            await axios.put(`${API_BASE_URL}/orders/${orderId}`, { status: 'cancelled' });
+            document.getElementById('orderModal').classList.add('hidden');
+            loadOrders(ordersCurrentPage);
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            alert('Failed to cancel order');
+        }
+    });
+
+    document.getElementById('viewHistoryBtn').addEventListener('click', () => {
+        alert('Order history functionality not implemented');
+    });
+
+    // Initial Load
+    showSection('dashboard');
+</script>
+</body>
+</html>
